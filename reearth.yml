@@ -1,0 +1,8 @@
+id: qml-reearth-style-converter
+name: QML Reearth Style Converter
+version: 1.0.0
+extensions:
+  - id: qml-converter
+    type: widget
+    name: QML Reearth Style Converter
+    description: QMLスタイルをRe:Earth Visualizerのlayer appearance JSONに変換するツール
