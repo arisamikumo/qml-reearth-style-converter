@@ -2,7 +2,8 @@
 
 QGISのスタイル（`.qml`）を、Re:Earth VisualizerのLayer Appearance JSONに変換するプラグインです。
 
-![Plugin UI](./docs/screenshot.png)
+<img width="400" alt="スクリーンショット 2026-04-09 11 49 27" src="https://github.com/user-attachments/assets/ee9291c9-4c49-4f8d-9ac8-d55d22b7ceaf" />
+<img width="400" alt="スクリーンショット 2026-04-09 12 28 11" src="https://github.com/user-attachments/assets/e20a2e81-37ee-40f7-9daa-fff9c3ec9066" />
 
 ---
 
