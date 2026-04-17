@@ -284,7 +284,7 @@ textarea{width:100%;font-family:monospace;font-size:11px;resize:vertical;border:
           defaultCond = ["true", "color('" + cv + "')"];
         } else {
           var cond = filter
-            .replace(/"([^"]*)"/g, function(_, f) { return "${" + f + "}"; })
+            .replace(/"([^"]*)"/g, function(_, f) { return "\${" + f + "}"; })
             .replace(/\bAND\b/gi, "&&").replace(/\bOR\b/gi, "||")
             .replace(/\s+/g, " ").trim();
           normalConds.push([cond, "color('" + cv + "')"]);
