@@ -269,9 +269,32 @@ textarea{width:100%;font-family:monospace;font-size:11px;resize:vertical;border:
       result = bea(conds2, meta.geomType, gsp(fs2));
 
     } else if (rt === "RuleRenderer") {
-      stype = "rule"; warn.push("ルールベースは未対応です。最初のシンボルのみ変換します。");
+      stype = "rule";
       var sm4 = gsm(rend), fs3 = Object.values(sm4)[0];
-      meta.geomType = ggt(fs3); result = ba(gsp(fs3), meta.geomType);
+      meta.geomType = ggt(fs3); meta.colors = [];
+      var normalConds = [], defaultCond = null;
+      rend.querySelectorAll("rules > rule").forEach(function(rule) {
+        var filter = rule.getAttribute("filter") || "";
+        var sym = sm4[rule.getAttribute("symbol")];
+        if (!sym) return;
+        var p = gsp(sym);
+        var cv = p.fillColor || p.strokeColor || p.pointColor || "#888888";
+        meta.colors.push(p.fillHex || "#888888");
+        if (!filter || /IS\s+NULL/i.test(filter)) {
+          defaultCond = ["true", "color('" + cv + "')"];
+        } else {
+          var cond = filter
+            .replace(/"([^"]*)"/g, function(_, f) { return "${" + f + "}"; })
+            .replace(/\bAND\b/gi, "&&").replace(/\bOR\b/gi, "||")
+            .replace(/\s+/g, " ").trim();
+          normalConds.push([cond, "color('" + cv + "')"]);
+        }
+      });
+      var firstFilter = (rend.querySelector("rules > rule") || { getAttribute: function() { return ""; } }).getAttribute("filter") || "";
+      var fm = firstFilter.match(/^"([^"]+)"/);
+      if (fm) meta.field = fm[1];
+      var conds3 = normalConds.concat([defaultCond || ["true", "color('#c8c8c880')"]]);
+      result = conds3.length > 1 ? bea(conds3, meta.geomType, gsp(fs3)) : ba(gsp(fs3), meta.geomType);
     } else {
       warn.push("レンダラータイプ「" + rt + "」は未対応です。");
     }
