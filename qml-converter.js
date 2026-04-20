@@ -272,7 +272,7 @@ textarea{width:100%;font-family:monospace;font-size:11px;resize:vertical;border:
       stype = "rule";
       var sm4 = gsm(rend), fs3 = Object.values(sm4)[0];
       meta.geomType = ggt(fs3); meta.colors = [];
-      var normalConds = [], defaultCond = null;
+      var normalRuleConds = [], nullConds = [];
       rend.querySelectorAll("rules > rule").forEach(function(rule) {
         var filter = rule.getAttribute("filter") || "";
         var sym = sm4[rule.getAttribute("symbol")];
@@ -280,21 +280,28 @@ textarea{width:100%;font-family:monospace;font-size:11px;resize:vertical;border:
         var p = gsp(sym);
         var cv = p.fillColor || p.strokeColor || p.pointColor || "#888888";
         meta.colors.push(p.fillHex || "#888888");
-        if (!filter || /IS\s+NULL/i.test(filter)) {
-          defaultCond = ["true", "color('" + cv + "')"];
+        var cond;
+        if (!filter) {
+          cond = "true";
+          normalRuleConds.push([cond, "color('" + cv + "')"]);
+        } else if (/IS NULL/i.test(filter)) {
+          var nf = filter.match(/^"([^"]+)"/);
+          cond = nf ? "\${" + nf[1] + "} === null" : "true";
+          nullConds.push([cond, "color('" + cv + "')"]);
         } else {
-          var cond = filter
+          cond = filter
             .replace(/"([^"]*)"/g, function(_, f) { return "\${" + f + "}"; })
-            .replace(/\bAND\b/gi, "&&").replace(/\bOR\b/gi, "||")
-            .replace(/\s+/g, " ").trim();
-          normalConds.push([cond, "color('" + cv + "')"]);
+            .replace(/ AND /gi, " && ").replace(/ OR /gi, " || ")
+            .replace(/[0-9]+[.][0-9]+/g, function(n) { return parseFloat(n); })
+            .trim();
+          normalRuleConds.push([cond, "color('" + cv + "')"]);
         }
       });
+      var conds3 = nullConds.concat(normalRuleConds);
       var firstFilter = (rend.querySelector("rules > rule") || { getAttribute: function() { return ""; } }).getAttribute("filter") || "";
       var fm = firstFilter.match(/^"([^"]+)"/);
       if (fm) meta.field = fm[1];
-      var conds3 = normalConds.concat([defaultCond || ["true", "color('#c8c8c880')"]]);
-      result = conds3.length > 1 ? bea(conds3, meta.geomType, gsp(fs3)) : ba(gsp(fs3), meta.geomType);
+      result = conds3.length ? bea(conds3, meta.geomType, gsp(fs3)) : ba(gsp(fs3), meta.geomType);
     } else {
       warn.push("レンダラータイプ「" + rt + "」は未対応です。");
     }
